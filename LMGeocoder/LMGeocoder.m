@@ -12,7 +12,8 @@
 #define kTimeoutInterval                        60
 #define kLMGeocoderErrorDomain                  @"LMGeocoderError"
 #define kGoogleAPIReverseGeocodingURL(lat, lng) [NSString stringWithFormat:@"http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&sensor=true", lat, lng];
-#define kGoogleAPIGeocodingURL(address)         [NSString stringWithFormat:@"http://maps.googleapis.com/maps/api/geocode/json?address=%@&sensor=true", address];
+#define kGoogleAPIGeocodingAddressParams(address)         [NSString stringWithFormat:@"address=%@&sensor=true", address];
+#define kGoogleAPIGeocodingURLByQuery(query)    [NSString stringWithFormat:@"http://maps.googleapis.com/maps/api/geocode/json?%@&sensor=true", query];
 
 @interface LMGeocoder ()
 
@@ -63,6 +64,26 @@
                      service:(LMGeocoderService)service
            completionHandler:(LMGeocodeCallback)handler
 {
+    
+    NSString *query = nil;
+    switch (self.currentService) {
+        case kLMGeocoderGoogleService:
+            query = kGoogleAPIGeocodingAddressParams(addressString)
+            break;
+        case kLMGeocoderAppleService:
+            query = addressString;
+            break;
+        default:
+            break;
+    }
+    
+    [self geocodeWithQuery:query service:service completionHandler:handler];
+}
+
+- (void)geocodeWithQuery:(NSString *)queryString
+                 service:(LMGeocoderService)service
+       completionHandler:(LMGeocodeCallback)handler
+{
     // Check isGeocoding
     if (_isGeocoding) {
         return;
@@ -70,7 +91,7 @@
     _isGeocoding = YES;
     
     // Store parameters
-    self.requestedAddress = addressString;
+    self.requestedAddress = queryString;
     self.completionHandler = handler;
     self.currentService = service;
     
@@ -92,7 +113,7 @@
             case kLMGeocoderGoogleService:
             {
                 // Geocode using Google service
-                NSString *urlString = kGoogleAPIGeocodingURL(self.requestedAddress);
+                NSString *urlString = kGoogleAPIGeocodingURLByQuery(self.requestedAddress);
                 [self buildConnectionFromURLString:urlString];
                 break;
             }
@@ -118,7 +139,6 @@
         }
     }
 }
-
 
 #pragma mark - REVERSE GEOCODE
 

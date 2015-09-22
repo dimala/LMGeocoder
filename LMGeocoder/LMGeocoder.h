@@ -67,6 +67,20 @@ typedef void (^LMGeocodeCallback) (NSArray *results, NSError *error);
            completionHandler:(LMGeocodeCallback)handler;
 
 /*!
+ *  Submits a forward-geocoding request using the specified query string.
+ *  After initiating a forward-geocoding request, do not attempt to initiate another forward- or reverse-geocoding request.
+ *  Geocoding requests are rate-limited for each app, so making too many requests in a short period of time may cause some of the requests to fail.
+ *  When the maximum rate is exceeded, the geocoder passes an error object to your completion handler.
+ *
+ *  @param queryString The string describing the location you want to look up.
+ *  @param service       The service API used to geocode.
+ *  @param handler       The callback to invoke with the geocode results. The callback will be invoked asynchronously from the main thread.
+ */
+- (void)geocodeWithQuery:(NSString *)queryString
+                 service:(LMGeocoderService)service
+       completionHandler:(LMGeocodeCallback)handler;
+
+/*!
  *  Submits a reverse-geocoding request for the specified coordinate.
  *  After initiating a reverse-geocoding request, do not attempt to initiate another reverse- or forward-geocoding request.
  *  Geocoding requests are rate-limited for each app, so making too many requests in a short period of time may cause some of the requests to fail. 
